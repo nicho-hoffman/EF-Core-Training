@@ -23,67 +23,87 @@ namespace EF.Core.Training
 
         // ALL CODE CHANGES SHOULD HAPPEN BELOW THIS COMMENT
 
-        public Task<Author> CreateAuthor(Author author)
+        public async Task<Author> CreateAuthor(Author author)
         {
-            throw new NotImplementedException();
+            apiContext.Authors.Add(author);
+            await CommitChangesAsync();
+
+            return author;
         }
 
-        public Task<AuthorBookLink> CreateAuthorBookLink(AuthorBookLink link)
+        public async Task<AuthorBookLink> CreateAuthorBookLink(AuthorBookLink link)
         {
-            throw new NotImplementedException();
+            apiContext.AuthorBookLinks.Add(link);
+            await CommitChangesAsync();
+            return link;
         }
 
         public async Task<Book> CreateBook(Book book)
         {
             apiContext.Books.Add(book);
-            await apiContext.SaveChangesAsync();
+            await CommitChangesAsync();
             return book;
         }
 
         public async Task<BookGenreLink> CreateBookGenreLink(BookGenreLink link)
         {
             apiContext.BookGenreLinks.Add(link);
-            await apiContext.SaveChangesAsync();
+            await CommitChangesAsync();
             return link;
         }
 
         public async Task<Genre> CreateGenre(Genre genre)
         {
             apiContext.Genres.Add(genre);
-            await apiContext.SaveChangesAsync();
+            await CommitChangesAsync();
             return genre;
         }
 
-        public Task<bool> DeleteAuthor(Author author)
+        public async Task<bool> DeleteAuthor(Author author)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await author.DoBeforeDelete(this);
+
+                apiContext.Authors.Remove(author);
+                return await CommitChangesAsync() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        public Task<bool> DeleteAuthorBookLink(AuthorBookLink link)
+        public async Task<bool> DeleteAuthorBookLink(AuthorBookLink link)
         {
-            throw new NotImplementedException();
+            apiContext.AuthorBookLinks.Remove(link);
+            return await CommitChangesAsync() > 0;
         }
 
-        public Task<bool> DeleteAuthorBookLinksForBook(int bookID)
+        public async Task<bool> DeleteAuthorBookLinksForBook(int bookID)
         {
-            throw new NotImplementedException();
+            apiContext.AuthorBookLinks.RemoveRange(apiContext.AuthorBookLinks.Where(x => x.BookID == bookID));
+            return await CommitChangesAsync() > 0;
         }
 
-        public Task<bool> DeleteBook(Book book)
+        public async Task<bool> DeleteBook(Book book)
         {
-            throw new NotImplementedException();
+            await book.DoBeforeDelete(this);
+
+            apiContext.Books.Remove(book);
+            return await CommitChangesAsync() > 0;
         }
 
         public async Task<bool> DeleteBookGenreLink(BookGenreLink link)
         {
-            apiContext.Remove(link);
-            return await apiContext.SaveChangesAsync() > 0;
+            apiContext.BookGenreLinks.Remove(link);
+            return await CommitChangesAsync() > 0;
         }
 
         public async Task<bool> DeleteBookGenreLinksForBook(int bookID)
         {
-            apiContext.RemoveRange(apiContext.BookGenreLinks.Where(x => x.BookID == bookID));
-            return await apiContext.SaveChangesAsync() > 0;
+            apiContext.BookGenreLinks.RemoveRange(apiContext.BookGenreLinks.Where(x => x.BookID == bookID));
+            return await CommitChangesAsync() > 0;
         }
 
         public async Task<bool> DeleteGenre(Genre genre)
@@ -92,7 +112,7 @@ namespace EF.Core.Training
             {
                 await genre.DoBeforeDelete(this);
                 apiContext.Genres.Remove(genre);
-                return await apiContext.SaveChangesAsync() > 0;
+                return await CommitChangesAsync() > 0;
             }
             catch
             {
@@ -100,34 +120,41 @@ namespace EF.Core.Training
             }
         }
 
-        public Task<ICollection<AuthorBookLink>> RetrieveAuthorBookLinksByAuthorID(int authorID)
+        public async Task<ICollection<AuthorBookLink>> RetrieveAuthorBookLinksByAuthorID(int authorID)
         {
-            throw new NotImplementedException();
+            return await apiContext.AuthorBookLinks.Where(authorBookLink => authorBookLink.AuthorID == authorID).ToListAsync();
         }
 
-        public Task<ICollection<AuthorBookLink>> RetrieveAuthorBookLinksByBookID(int bookID)
+        public async Task<ICollection<AuthorBookLink>> RetrieveAuthorBookLinksByBookID(int bookID)
         {
-            throw new NotImplementedException();
+            return await apiContext.AuthorBookLinks.Where(authorBookLink => authorBookLink.BookID == bookID).ToListAsync();
         }
 
-        public Task<Author> RetrieveAuthorByID(int authorID)
+        public async Task<Author> RetrieveAuthorByID(int authorID)
         {
-            throw new NotImplementedException();
+            return await apiContext.Authors.FirstOrDefaultAsync(author => author.ID == authorID);
         }
 
-        public Task<ICollection<Author>> RetrieveAuthors()
+        public async Task<ICollection<Author>> RetrieveAuthors()
         {
-            throw new NotImplementedException();
+            return await apiContext.Authors.ToListAsync();
         }
 
-        public Task<ICollection<Author>> RetrieveAuthorsByBookID(int bookID)
+        public async Task<ICollection<Author>> RetrieveAuthorsByBookID(int bookID)
         {
-            throw new NotImplementedException();
+            //return await apiContext.AuthorBookLinks.Include(authorBookLink => authorBookLink.Author)
+            //    .Where(authorBookLink => authorBookLink.BookID == bookID)
+            //    .Select(authorBookLink => authorBookLink.Author)
+            //    .ToListAsync();
+
+            return await apiContext.Authors.Include(author => author.BookLinks)
+                .Where(author => author.BookLinks.Any(bookLink => bookLink.BookID == bookID))
+                .ToListAsync();
         }
 
-        public Task<Book> RetrieveBookByID(int bookID)
+        public async Task<Book> RetrieveBookByID(int bookID)
         {
-            throw new NotImplementedException();
+            return await apiContext.Books.FirstOrDefaultAsync(book => book.ID == bookID);
         }
 
         public async Task<ICollection<BookGenreLink>> RetrieveBookGenreLinksByBookID(int bookID)
@@ -135,19 +162,21 @@ namespace EF.Core.Training
             return await apiContext.BookGenreLinks.Where(x => x.BookID == bookID).ToListAsync();
         }
 
-        public Task<ICollection<Book>> RetrieveBooks()
+        public async Task<ICollection<Book>> RetrieveBooks()
         {
-            throw new NotImplementedException();
+            return await apiContext.Books.ToListAsync();
         }
 
-        public Task<ICollection<Book>> RetrieveBooksByAuthorID(int authorID)
+        public async Task<ICollection<Book>> RetrieveBooksByAuthorID(int authorID)
         {
-            throw new NotImplementedException();
+            return await apiContext.Books.Include(book => book.AuthorLinks)
+                .Where(book => book.AuthorLinks.Any(authorLink => authorLink.AuthorID == authorID)).ToListAsync();
         }
 
-        public Task<ICollection<Book>> RetrieveBooksByGenreID(int genreID)
+        public async Task<ICollection<Book>> RetrieveBooksByGenreID(int genreID)
         {
-            throw new NotImplementedException();
+            return await apiContext.Books.Include(x => x.GenreLinks)
+                .Where(x => x.GenreLinks.Any(l => l.GenreID == genreID)).ToListAsync();
         }
 
         public async Task<Genre> RetrieveGenreByID(int genreID)
@@ -166,22 +195,33 @@ namespace EF.Core.Training
                 .Where(x => x.BookLinks.Any(l => l.BookID == bookID)).ToListAsync();
         }
 
-        public Task<Author> UpdateAuthor(Author author)
+        public async Task<Author> UpdateAuthor(Author author)
         {
-            throw new NotImplementedException();
+            apiContext.Authors.Update(author);
+            await CommitChangesAsync();
+
+            return author;
         }
 
-        public Task<Book> UpdateBook(Book book)
+        public async Task<Book> UpdateBook(Book book)
         {
-            throw new NotImplementedException();
+            apiContext.Books.Update(book);
+            await CommitChangesAsync();
+
+            return book;
         }
 
         public async Task<Genre> UpdateGenre(Genre genre)
         {
             apiContext.Genres.Update(genre);
-            await apiContext.SaveChangesAsync();
+            await CommitChangesAsync();
 
             return genre;
+        }
+
+        private async Task<int> CommitChangesAsync()
+        {
+            return await apiContext.SaveChangesAsync();
         }
     }
 }
