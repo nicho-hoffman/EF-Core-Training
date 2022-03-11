@@ -60,9 +60,16 @@ namespace EF.Core.Training
 
         public async Task<bool> DeleteAuthor(Author author)
         {
-            await author.DoBeforeDelete(this);
-            apiContext.Authors.Remove(author);
-            return await apiContext.SaveChangesAsync() > 0;
+            try
+            {
+                await author.DoBeforeDelete(this);
+                apiContext.Authors.Remove(author);
+                return await apiContext.SaveChangesAsync() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<bool> DeleteAuthorBookLink(AuthorBookLink link)
