@@ -232,31 +232,5 @@ namespace EF.Core.Training
             return genre;
         }
         #endregion
-
-        #region Validators
-        private bool ValidateAuthor(Author author)
-        {
-            if (author == null || author.Name == null)
-                return false;
-
-            return true;
-        }
-
-        private bool ValidateBook(Book book)
-        {
-            if (book == null || book.ISBN == null || book.Title == null)
-                return false;
-
-            return true;
-        }
-
-        private bool ValidateGenre(Genre genre)
-        {
-            if (genre == null || genre.Name == null)
-                return false;
-
-            return true;
-        }
-        #endregion
     }
 }
