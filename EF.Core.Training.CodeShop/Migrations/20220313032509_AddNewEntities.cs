@@ -1,0 +1,126 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace EF.Core.Training.Migrations
+{
+    public partial class AddNewEntities : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_BookGenreLink_Book_BookID",
+                table: "BookGenreLink");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Title",
+                table: "Book",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "ISBN",
+                table: "Book",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true);
+
+            migrationBuilder.CreateTable(
+                name: "Author",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    First = table.Column<string>(type: "TEXT", nullable: true),
+                    Last = table.Column<string>(type: "TEXT", nullable: true),
+                    Bio = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Author", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuthorBookLink",
+                columns: table => new
+                {
+                    AuthorID = table.Column<int>(type: "INTEGER", nullable: false),
+                    BookID = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthorBookLink", x => new { x.AuthorID, x.BookID });
+                    table.ForeignKey(
+                        name: "FK_AuthorBookLink_Author_AuthorID",
+                        column: x => x.AuthorID,
+                        principalTable: "Author",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AuthorBookLink_Book_BookID",
+                        column: x => x.BookID,
+                        principalTable: "Book",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuthorBookLink_BookID",
+                table: "AuthorBookLink",
+                column: "BookID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_BookGenreLink_Book_BookID",
+                table: "BookGenreLink",
+                column: "BookID",
+                principalTable: "Book",
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Restrict);
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_BookGenreLink_Book_BookID",
+                table: "BookGenreLink");
+
+            migrationBuilder.DropTable(
+                name: "AuthorBookLink");
+
+            migrationBuilder.DropTable(
+                name: "Author");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Title",
+                table: "Book",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "TEXT");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "ISBN",
+                table: "Book",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "TEXT");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_BookGenreLink_Book_BookID",
+                table: "BookGenreLink",
+                column: "BookID",
+                principalTable: "Book",
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
+        }
+    }
+}
