@@ -54,14 +54,14 @@ namespace EF.Core.Training
             modelBuilder.Entity<Book>(entity =>
             {
                 entity.ToTable("Book");
-                entity.HasKey("ID");
+                entity.HasKey(e => e.ID);
 
                 // something might be missing on these ..
-                entity.Property(e => e.ISBN).HasColumnType("TEXT");
-                entity.Property(e => e.Title).HasColumnType("TEXT");
+                entity.Property(e => e.ISBN).HasColumnType("TEXT").IsRequired();
+                entity.Property(e => e.Title).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Description).HasColumnType("TEXT");
                 entity.Property(e => e.Price).HasColumnType("TEXT").IsRequired();
-                entity.Property(e => e.Pages).HasColumnType("INTERGER").IsRequired();
+                entity.Property(e => e.Pages).HasColumnType("INTEGER").IsRequired();
 
                 // something is wrong about these ..
                 entity.HasMany(e => e.GenreLinks).WithOne(l => l.Book)
