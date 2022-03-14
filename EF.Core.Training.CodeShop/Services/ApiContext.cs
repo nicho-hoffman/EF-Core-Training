@@ -24,6 +24,9 @@ namespace EF.Core.Training
 
         // TODO : Add more DbSets<T> for the other two Models here
 
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<AuthorBookLink> AuthorBookLinks { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // this entity is good to go, CRUD Unit Tests passing
@@ -54,22 +57,50 @@ namespace EF.Core.Training
             modelBuilder.Entity<Book>(entity =>
             {
                 entity.ToTable("Book");
-                entity.HasKey("ID");
+                entity.HasKey(e => e.ID);
 
                 // something might be missing on these ..
-                entity.Property(e => e.ISBN).HasColumnType("TEXT");
-                entity.Property(e => e.Title).HasColumnType("TEXT");
+                entity.Property(e => e.ISBN).HasColumnType("TEXT").IsRequired();
+                entity.Property(e => e.Title).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Description).HasColumnType("TEXT");
                 entity.Property(e => e.Price).HasColumnType("TEXT").IsRequired();
-                entity.Property(e => e.Pages).HasColumnType("INTERGER").IsRequired();
+                entity.Property(e => e.Pages).HasColumnType("INTEGER").IsRequired();
 
                 // something is wrong about these ..
                 entity.HasMany(e => e.GenreLinks).WithOne(l => l.Book)
                     .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
-                entity.Ignore(e => e.AuthorLinks);
+                //entity.Ignore(e => e.AuthorLinks);
+                entity.HasMany(e => e.AuthorLinks).WithOne(l => l.Book)
+                .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
+
             });
 
             // TODO : Add the other two modelBuilder.Entity setups
+
+            modelBuilder.Entity<Author>(entity =>
+            {
+                entity.ToTable("Author");
+                entity.HasKey(e => e.ID);
+
+                entity.Property(e => e.Name).HasColumnType("nvarchar(255)").IsRequired();
+
+                entity.HasMany(e => e.BookLinks).WithOne(e => e.Author)
+                .HasForeignKey(e => e.AuthorID);
+            });
+
+            modelBuilder.Entity<AuthorBookLink>(entity =>
+            {
+                entity.ToTable("AuthorBookLink");
+                entity.HasKey(e => new {e.BookID, e.AuthorID});
+
+                entity.HasOne(e => e.Author).WithMany(x => x.BookLinks)
+                    .HasForeignKey(e => e.AuthorID);
+
+                entity.HasOne(e => e.Book).WithMany(x => x.AuthorLinks)
+                    .HasForeignKey(e => e.BookID);
+            }
+            
+            );
         }
     }
 }
