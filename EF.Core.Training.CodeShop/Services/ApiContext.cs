@@ -66,10 +66,10 @@ namespace EF.Core.Training
                 entity.Property(e => e.Pages).HasColumnType("INTERGER").IsRequired();
 
                 // something is wrong about these ..
-                //entity.HasMany(e => e.GenreLinks).WithOne(l => l.Book)
-                //    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
-                //entity.HasMany(e => e.AuthorLinks).WithOne(l => l.Book)
-                //    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(e => e.GenreLinks).WithOne(l => l.Book)
+                    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(e => e.AuthorLinks).WithOne(l => l.Book)
+                    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
             });
 
             // TODO : Add the other two modelBuilder.Entity setups
@@ -84,8 +84,8 @@ namespace EF.Core.Training
                 entity.Property(e => e.Last).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Bio).HasColumnType("TEXT").IsRequired();
 
-                //entity.HasMany(e => e.BookLinks).WithOne(l => l.Author)
-                //    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(e => e.BookLinks).WithOne(l => l.Author)
+                    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<AuthorBookLink>(entity =>
