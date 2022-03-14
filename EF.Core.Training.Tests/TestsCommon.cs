@@ -34,8 +34,16 @@ namespace EF.Core.Training.Tests
         [TestInitialize]
         public async Task Initialize()
         {
-            repository = new EfRepository();
-            await repository.MigrateDb();
+            try
+            {
+                repository = new EfRepository();
+                await repository.MigrateDb();
+            }
+            catch(System.Exception ex)
+            {
+                var x = 1;
+            }
+            
         }
 
         public async Task<Author> CreateAuthor(Author author = null)

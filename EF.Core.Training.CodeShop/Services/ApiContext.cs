@@ -18,6 +18,8 @@ namespace EF.Core.Training
 
         // ALL CODE CHANGES SHOULD HAPPEN BELOW THIS COMMENT
 
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<AuthorBookLink> AuthorBookLinks { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookGenreLink> BookGenreLinks { get; set; }
@@ -57,8 +59,8 @@ namespace EF.Core.Training
                 entity.HasKey("ID");
 
                 // something might be missing on these ..
-                entity.Property(e => e.ISBN).HasColumnType("TEXT");
-                entity.Property(e => e.Title).HasColumnType("TEXT");
+                entity.Property(e => e.ISBN).HasColumnType("TEXT").IsRequired();
+                entity.Property(e => e.Title).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Description).HasColumnType("TEXT");
                 entity.Property(e => e.Price).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Pages).HasColumnType("INTERGER").IsRequired();
@@ -66,10 +68,35 @@ namespace EF.Core.Training
                 // something is wrong about these ..
                 entity.HasMany(e => e.GenreLinks).WithOne(l => l.Book)
                     .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
-                entity.Ignore(e => e.AuthorLinks);
+
+            });
+
+            modelBuilder.Entity<AuthorBookLink>(entity =>
+            {
+                entity.ToTable("AuthorBookLink");
+                entity.HasKey(e => new { e.BookID, e.AuthorID });
+
+                entity.HasOne(e => e.Author).WithMany(x => x.BookLinks)
+                    .HasForeignKey(e => e.AuthorID);
+
+                entity.HasOne(e => e.Book).WithMany(x => x.AuthorLinks)
+                    .HasForeignKey(e => e.BookID);
             });
 
             // TODO : Add the other two modelBuilder.Entity setups
+            modelBuilder.Entity<Author>(entity =>
+            {
+                entity.ToTable("Author");
+                entity.HasKey("ID");
+
+                entity.Property(e => e.Name).HasColumnType("TEXT").IsRequired();
+                entity.Property(e => e.First).HasColumnType("TEXT");
+                entity.Property(e => e.Last).HasColumnType("TEXT");
+                entity.Property(e => e.Bio).HasColumnType("TEXT");
+
+                entity.HasMany(e => e.BookLinks).WithOne(l => l.Author)
+                    .HasForeignKey(l => l.AuthorID).OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }
