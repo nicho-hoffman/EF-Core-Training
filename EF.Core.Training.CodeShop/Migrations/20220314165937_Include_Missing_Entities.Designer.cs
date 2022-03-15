@@ -2,6 +2,7 @@
 using EF.Core.Training;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EF.Core.Training.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    partial class ApiContextModelSnapshot : ModelSnapshot
+    [Migration("20220314165937_Include_Missing_Entities")]
+    partial class Include_Missing_Entities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
@@ -32,7 +34,6 @@ namespace EF.Core.Training.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
@@ -42,15 +43,15 @@ namespace EF.Core.Training.Migrations
 
             modelBuilder.Entity("EF.Core.Training.BlackBox.AuthorBookLink", b =>
                 {
-                    b.Property<int>("BookID")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("AuthorID")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("BookID", "AuthorID");
+                    b.Property<int>("BookID")
+                        .HasColumnType("INTEGER");
 
-                    b.HasIndex("AuthorID");
+                    b.HasKey("AuthorID", "BookID");
+
+                    b.HasIndex("BookID");
 
                     b.ToTable("AuthorBookLink", (string)null);
                 });
@@ -65,7 +66,6 @@ namespace EF.Core.Training.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ISBN")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Pages")
@@ -75,7 +75,6 @@ namespace EF.Core.Training.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
@@ -118,7 +117,7 @@ namespace EF.Core.Training.Migrations
                     b.HasOne("EF.Core.Training.BlackBox.Author", "Author")
                         .WithMany("BookLinks")
                         .HasForeignKey("AuthorID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EF.Core.Training.BlackBox.Book", "Book")
