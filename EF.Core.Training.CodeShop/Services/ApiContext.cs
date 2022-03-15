@@ -23,7 +23,6 @@ namespace EF.Core.Training
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookGenreLink> BookGenreLinks { get; set; }
 
-        // TODO : Add more DbSets<T> for the other two Models here
         public DbSet<Author> Authors { get; set; }
         public DbSet<AuthorBookLink> AuthorBookLinks { get; set; }
 
@@ -38,7 +37,7 @@ namespace EF.Core.Training
                 entity.Property(e => e.Name).HasColumnType("TEXT").IsRequired();
             });
 
-            // this entity is good to go once Book is corrected
+            // this entity is good to go, CRUD Unit Tests passing
             modelBuilder.Entity<BookGenreLink>(entity =>
             {
                 entity.ToTable("BookGenreLink");
@@ -53,13 +52,12 @@ namespace EF.Core.Training
 
             // See https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/types for C# to SQLite DataTypes
 
-            // this entity has some issues that prevent unit tests from passing
+            // this entity is good to go, CRUD Unit Tests passing
             modelBuilder.Entity<Book>(entity =>
             {
                 entity.ToTable("Book");
                 entity.HasKey("ID");
 
-                // something might be missing on these ..
                 entity.Property(e => e.ISBN).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Title).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Description).HasColumnType("TEXT");
@@ -71,8 +69,7 @@ namespace EF.Core.Training
                 entity.Ignore(e => e.AuthorLinks);
             });
 
-            // TODO : Add the other two modelBuilder.Entity setups
-
+            // this entity is good to go, CRUD Unit Tests passing
             modelBuilder.Entity<Author>(entity =>
             {
                 entity.ToTable("Author");
@@ -84,6 +81,7 @@ namespace EF.Core.Training
                 entity.Property(e => e.Bio).HasColumnType("TEXT");
             });
 
+            // this entity is good to go, CRUD Unit Tests passing
             modelBuilder.Entity<AuthorBookLink>(entity =>
             {
                 entity.ToTable("AuthorBookLink");
