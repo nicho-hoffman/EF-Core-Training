@@ -4,50 +4,36 @@
 
 namespace EF.Core.Training.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Update_api_context : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Book",
+                name: "Author",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ISBN = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Pages = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<decimal>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    First = table.Column<string>(type: "TEXT", nullable: true),
+                    Last = table.Column<string>(type: "TEXT", nullable: true),
+                    Bio = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Book", x => x.ID);
+                    table.PrimaryKey("PK_Author", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Genre",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Genre", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BookGenreLink",
+                name: "AuthorBookLink",
                 columns: table => new
                 {
                     BookID = table.Column<int>(type: "INTEGER", nullable: false),
-                    GenreID = table.Column<int>(type: "INTEGER", nullable: false)
+                    AuthorID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookGenreLink", x => new { x.BookID, x.GenreID });
+                    table.PrimaryKey("PK_BookGenreLink", x => new { x.BookID, x.AuthorID });
                     table.ForeignKey(
                         name: "FK_BookGenreLink_Book_BookID",
                         column: x => x.BookID,
@@ -56,28 +42,28 @@ namespace EF.Core.Training.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_BookGenreLink_Genre_GenreID",
-                        column: x => x.GenreID,
-                        principalTable: "Genre",
+                        column: x => x.AuthorID,
+                        principalTable: "Author",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BookGenreLink_GenreID",
-                table: "BookGenreLink",
-                column: "GenreID");
+                name: "IX_AuthorBookLink_BookID",
+                table: "AuthorBookLink",
+                column: "BookID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "BookGenreLink");
-
             migrationBuilder.DropTable(
-                name: "Book");
+                name: "BookGenreLink");
 
-            migrationBuilder.DropTable(
-                name: "Genre");
+            migrationBuilder.DropIndex(
+                name: "IX_AuthorBookLink_BookID",
+                table: "AuthorBookLink");
         }
     }
 }

@@ -10,7 +10,7 @@ namespace EF.Core.Training
         public ApiContext()
         {
             // saves the SQLite EF.Core.Training.db to the solution's root folder
-            string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\..\"));
+            string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"../../../../"));
             DbPath = Path.Join(path, "EF.Core.Training.db");
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite($"Data Source={DbPath}");
@@ -21,8 +21,8 @@ namespace EF.Core.Training
         public DbSet<Book> Books { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookGenreLink> BookGenreLinks { get; set; }
-
-        // TODO : Add more DbSets<T> for the other two Models here
+        public DbSet <Author> Authors { get; set; }
+        public DbSet<AuthorBookLink> AuthorBookLinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +40,7 @@ namespace EF.Core.Training
             {
                 entity.ToTable("BookGenreLink");
                 entity.HasKey(e => new { e.BookID, e.GenreID });
+                entity.HasIndex(e => e.GenreID);
 
                 entity.HasOne(e => e.Book).WithMany(x => x.GenreLinks)
                     .HasForeignKey(e => e.BookID);
@@ -54,22 +55,46 @@ namespace EF.Core.Training
             modelBuilder.Entity<Book>(entity =>
             {
                 entity.ToTable("Book");
-                entity.HasKey("ID");
+                //entity.HasKey("ID");
+                entity.HasKey(e => e.ID);
 
                 // something might be missing on these ..
-                entity.Property(e => e.ISBN).HasColumnType("TEXT");
-                entity.Property(e => e.Title).HasColumnType("TEXT");
+                entity.Property(e => e.ISBN).HasColumnType("TEXT").IsRequired();
+                entity.Property(e => e.Title).HasColumnType("TEXT").IsRequired();
                 entity.Property(e => e.Description).HasColumnType("TEXT");
                 entity.Property(e => e.Price).HasColumnType("TEXT").IsRequired();
-                entity.Property(e => e.Pages).HasColumnType("INTERGER").IsRequired();
+                entity.Property(e => e.Pages).HasColumnType("INTEGER").IsRequired();
 
                 // something is wrong about these ..
                 entity.HasMany(e => e.GenreLinks).WithOne(l => l.Book)
-                    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade);
-                entity.Ignore(e => e.AuthorLinks);
+                    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade).IsRequired(); //? Add extra chained call from model snapshot? 
+                entity.HasMany(e => e.AuthorLinks).WithOne(l => l.Book)
+                    .HasForeignKey(l => l.BookID).OnDelete(DeleteBehavior.Cascade).IsRequired();
             });
 
-            // TODO : Add the other two modelBuilder.Entity setups
+            modelBuilder.Entity<Author>(entity =>
+            {
+                entity.ToTable("Author");
+                entity.HasKey(e => e.ID);
+
+                entity.Property(e => e.Name).HasColumnType("TEXT").IsRequired();
+                entity.Property(e => e.First).HasColumnType("TEXT");
+                entity.Property(e => e.Last).HasColumnType("TEXT");
+                entity.Property(e => e.Bio).HasColumnType("TEXT");
+            });
+
+            modelBuilder.Entity<AuthorBookLink>(entity =>
+            {
+                entity.ToTable("AuthorBookLink");
+                entity.HasKey(e => new { e.AuthorID, e.BookID });
+                entity.HasIndex(e => e.AuthorID);
+
+                entity.HasOne(e => e.Author).WithMany(x => x.BookLinks)
+                    .HasForeignKey(e => e.AuthorID);
+
+                entity.HasOne(e => e.Book).WithMany(x => x.AuthorLinks)
+                    .HasForeignKey(e => e.BookID);
+            });
         }
     }
 }
